@@ -1,5 +1,7 @@
 package jps
 
+import "sort"
+
 type item struct {
 	point             Point
 	predecessor       Point
@@ -25,6 +27,9 @@ func (pq *priorityQueue) Push(x any) {
 }
 
 func (pq *priorityQueue) Pop() any {
+	if !sort.IsSorted(*pq) {
+		sort.Sort(*pq)
+	}
 	old := *pq
 	n := len(old)
 	result := old[n-1]
