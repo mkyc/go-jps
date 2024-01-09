@@ -10,25 +10,26 @@ import (
 // - start or goal is inside an obstacle
 // - there is no path from start to goal
 func Find(obstacles [][]bool, start, goal Point) ([]Point, error) {
-	//check if start and goal are inside the map
-	if pointsOutsideMap(obstacles, start, goal) {
-		return nil, errors.New("start or goal is outside the map")
+	startCheck := checkPoints(obstacles, start)
+	goalCheck := checkPoints(obstacles, goal)
+	if startCheck == pointCheckOutsideMap {
+		return nil, errors.New("start is outside the map")
 	}
-	//check if start and goal are inside an obstacle
-	if pointsInsideObstacle(obstacles, start, goal) {
-		return nil, errors.New("start or goal is inside an obstacle")
+	if goalCheck == pointCheckOutsideMap {
+		return nil, errors.New("goal is outside the map")
 	}
-	//check if path is straight line
+	if startCheck == pointCheckInsideObst {
+		return nil, errors.New("start is inside an obstacle")
+	}
+	if goalCheck == pointCheckInsideObst {
+		return nil, errors.New("goal is inside an obstacle")
+	}
 	straightLine := makeLine(start, goal)
-	if isLinePassable(obstacles, straightLine) {
+	lineCheck := checkPoints(obstacles, straightLine...)
+	if lineCheck == pointCheckPassable {
 		return straightLine, nil
 	}
-	//check if there is a path from start to goal
-	path, err := findPath(obstacles, start, goal)
-	if err != nil {
-		return nil, err
-	}
-	return path, nil
+	return findPath(obstacles, start, goal)
 }
 
 // TryFind returns a path from start to goal, or an error in following cases:

@@ -60,18 +60,18 @@ func prepareForcedDirections(obstacles [][]bool, current, direction Point) []Poi
 	}
 	cx, cy := current.X, current.Y
 	if dy == 0 {
-		if !isPointPassable(obstacles, Point{cx - dx, cy - 1}) && isPointPassable(obstacles, Point{cx, cy - 1}) {
+		if checkPoints(obstacles, Point{cx - dx, cy - 1}) != pointCheckPassable && checkPoints(obstacles, Point{cx, cy - 1}) == pointCheckPassable {
 			directions = append(directions, Point{0, -1}, Point{dx, -1})
 		}
-		if !isPointPassable(obstacles, Point{cx - dx, cy + 1}) && isPointPassable(obstacles, Point{cx, cy + 1}) {
+		if checkPoints(obstacles, Point{cx - dx, cy + 1}) != pointCheckPassable && checkPoints(obstacles, Point{cx, cy + 1}) == pointCheckPassable {
 			directions = append(directions, Point{0, 1}, Point{dx, 1})
 		}
 	}
 	if dx == 0 {
-		if !isPointPassable(obstacles, Point{cx - 1, cy - dy}) && isPointPassable(obstacles, Point{cx - 1, cy}) {
+		if checkPoints(obstacles, Point{cx - 1, cy - dy}) != pointCheckPassable && checkPoints(obstacles, Point{cx - 1, cy}) == pointCheckPassable {
 			directions = append(directions, Point{-1, 0}, Point{-1, dy})
 		}
-		if !isPointPassable(obstacles, Point{cx + 1, cy - dy}) && isPointPassable(obstacles, Point{cx + 1, cy}) {
+		if checkPoints(obstacles, Point{cx + 1, cy - dy}) != pointCheckPassable && checkPoints(obstacles, Point{cx + 1, cy}) == pointCheckPassable {
 			directions = append(directions, Point{1, 0}, Point{1, dy})
 		}
 	}
@@ -109,7 +109,7 @@ func prepareDirections(obstacles [][]bool, current, predecessor Point) []Point {
 
 func prepareCandidate(obstacles [][]bool, current, direction, goal Point, price float64) pricedPoint {
 	candidate := add(current, direction)
-	if !isPointPassable(obstacles, candidate) || isCornerCut(obstacles, current, direction) {
+	if checkPoints(obstacles, candidate) != pointCheckPassable || isCornerCut(obstacles, current, direction) {
 		return pricedPoint{}
 	}
 	currentPrice := price + math.Sqrt(math.Abs(float64(direction.X))+math.Abs(float64(direction.Y)))

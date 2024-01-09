@@ -133,8 +133,8 @@ func TestFind_maps(t *testing.T) {
 		{
 			name:     "1_direct",
 			filename: "./test_assets/map1.png",
-			start:    Point{170, 160},
-			goal:     Point{170, 170},
+			start:    Point{140, 195},
+			goal:     Point{250, 300},
 			wantErr:  false,
 		},
 	}
