@@ -21,8 +21,8 @@ func checkPoints(obstacles [][]bool, points ...Point) pointCheck {
 }
 
 func isCornerCut(obstacles [][]bool, point, direction Point) bool {
-	for _, v := range prepareSubordinatedDirections(direction) {
-		if checkPoints(obstacles, add(point, v)) != pointCheckPassable {
+	for _, d := range prepareSubordinatedDirections(direction) {
+		if checkPoints(obstacles, point.add(d)) != pointCheckPassable {
 			return true
 		}
 	}

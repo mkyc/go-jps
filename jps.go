@@ -24,7 +24,7 @@ func Find(obstacles [][]bool, start, goal Point) ([]Point, error) {
 	if goalCheck == pointCheckInsideObst {
 		return nil, errors.New("goal is inside an obstacle")
 	}
-	straightLine := makeLine(start, goal)
+	straightLine := start.lineTo(goal)
 	lineCheck := checkPoints(obstacles, straightLine...)
 	if lineCheck == pointCheckPassable {
 		return straightLine, nil
@@ -56,7 +56,7 @@ func findPath(obstacles [][]bool, start, goal Point) ([]Point, error) {
 		point:             start,
 		predecessor:       Point{},
 		distanceFromStart: 0,
-		distanceToGoal:    estimateDistance(start, goal),
+		distanceToGoal:    start.distanceTo(goal),
 	})
 	for q.Len() > 0 {
 		current := heap.Pop(&q).(*item)
@@ -74,7 +74,7 @@ func findPath(obstacles [][]bool, start, goal Point) ([]Point, error) {
 					point:             candidate.p,
 					predecessor:       current.point,
 					distanceFromStart: current.distanceFromStart + candidate.price,
-					distanceToGoal:    estimateDistance(candidate.p, goal),
+					distanceToGoal:    candidate.p.distanceTo(goal),
 				})
 			}
 		}

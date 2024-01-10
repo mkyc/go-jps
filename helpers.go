@@ -4,31 +4,6 @@ import (
 	"math"
 )
 
-func makeLine(start, goal Point) []Point {
-	var line []Point
-	dx := goal.X - start.X
-	dy := goal.Y - start.Y
-	steps := maxInt(absInt(dx), absInt(dy))
-	if steps == 0 {
-		return append(line, start)
-	}
-	for i := 0; i <= steps; i++ {
-		x := float64(start.X) + float64(i)*float64(dx)/float64(steps)
-		y := float64(start.Y) + float64(i)*float64(dy)/float64(steps)
-		line = append(line, Point{int(x), int(y)})
-	}
-	return line
-}
-
-func estimateDistance(start, goal Point) float64 {
-	return math.Sqrt(math.Pow(float64(start.X-goal.X), 2) + math.Pow(float64(start.Y-goal.Y), 2))
-}
-
-func direction(from, to Point) Point {
-	d := sub(to, from)
-	return Point{signInt(d.X), signInt(d.Y)}
-}
-
 func reverse(points []Point) []Point {
 	for i := len(points)/2 - 1; i >= 0; i-- {
 		opp := len(points) - 1 - i
@@ -42,10 +17,10 @@ func reconstructPath(predecessors map[Point]Point, start, goal Point) []Point {
 	current := goal
 	for current != start {
 		next := predecessors[current]
-		d := direction(current, next)
+		d := current.directionTo(next)
 		for current != next {
 			result = append(result, current)
-			current = add(current, d)
+			current = current.add(d)
 		}
 	}
 	result = append(result, start)
@@ -55,7 +30,7 @@ func reconstructPath(predecessors map[Point]Point, start, goal Point) []Point {
 func prepareForcedDirections(obstacles [][]bool, current, direction Point) []Point {
 	directions := make([]Point, 0)
 	dx, dy := direction.X, direction.Y
-	if absInt(dx)+absInt(dy) == 2 {
+	if abs(dx)+abs(dy) == 2 {
 		return directions
 	}
 	cx, cy := current.X, current.Y
@@ -80,7 +55,7 @@ func prepareForcedDirections(obstacles [][]bool, current, direction Point) []Poi
 
 func prepareSubordinatedDirections(direction Point) []Point {
 	directions := make([]Point, 0, 2)
-	if absInt(direction.X)+absInt(direction.Y) == 2 {
+	if abs(direction.X)+abs(direction.Y) == 2 {
 		directions = append(directions, Point{direction.X, 0}, Point{0, direction.Y})
 	}
 	return directions
@@ -88,7 +63,7 @@ func prepareSubordinatedDirections(direction Point) []Point {
 
 func prepareDirections(obstacles [][]bool, current, predecessor Point) []Point {
 	if predecessor != (Point{}) {
-		d := direction(predecessor, current)
+		d := predecessor.directionTo(current)
 		directions := []Point{d}
 		directions = append(directions, prepareForcedDirections(obstacles, current, d)...)
 		directions = append(directions, prepareSubordinatedDirections(d)...)
@@ -108,7 +83,7 @@ func prepareDirections(obstacles [][]bool, current, predecessor Point) []Point {
 }
 
 func prepareCandidate(obstacles [][]bool, current, direction, goal Point, price float64) pricedPoint {
-	candidate := add(current, direction)
+	candidate := current.add(direction)
 	if checkPoints(obstacles, candidate) != pointCheckPassable || isCornerCut(obstacles, current, direction) {
 		return pricedPoint{}
 	}
@@ -137,4 +112,21 @@ func prepareCandidates(obstacles [][]bool, current, predecessor, goal Point) []p
 		}
 	}
 	return candidates
+}
+
+func abs(i int) int {
+	if i < 0 {
+		return -i
+	}
+	return i
+}
+
+func sign(i int) int {
+	switch {
+	case i > 0:
+		return 1
+	case i < 0:
+		return -1
+	}
+	return 0
 }
