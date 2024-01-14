@@ -34,6 +34,17 @@ func reconstructPath(predecessors map[Point]Point, start, goal Point) []Point {
 	return reverse(result)
 }
 
+func nearestOnLine(obstacles [][]bool, from, to Point) Point {
+	points := line(from, to)
+	points = reverse(points)
+	for _, p := range points {
+		if isPointPassable(obstacles, p) {
+			return Point{p.X, p.Y}
+		}
+	}
+	return from
+}
+
 func abs(i int) int {
 	if i < 0 {
 		return -i

@@ -22,8 +22,7 @@ func Find(obstacles [][]bool, start, goal Point) ([]Point, error) {
 	if isPointInsideObstacle(obstacles, goal) {
 		return nil, errors.New("goal is inside an obstacle")
 	}
-	straightLine := line(start, goal)
-	if isLinePassable(obstacles, straightLine) {
+	if straightLine := line(start, goal); isLinePassable(obstacles, straightLine) {
 		return straightLine, nil
 	}
 	return findPath(obstacles, start, goal)
@@ -31,16 +30,32 @@ func Find(obstacles [][]bool, start, goal Point) ([]Point, error) {
 
 // TryFind returns a path from start to goal, or an error in following cases:
 // - start or goal is outside the map
+// - there is no path from start to goal
 // If start or goal is inside an obstacle, it will try to find nearest point on the edge of the obstacle.
-// If there is no path from start to goal, it will try to find nearest point on the edge of the obstacle.
 func TryFind(obstacles [][]bool, start, goal Point) ([]Point, error) {
-	panic("TODO")
+	if isPointOutsideMap(obstacles, start) {
+		return nil, errors.New("start is outside the map")
+	}
+	if isPointOutsideMap(obstacles, goal) {
+		return nil, errors.New("goal is outside the map")
+	}
+	if isPointInsideObstacle(obstacles, start) {
+		start = nearestOnLine(obstacles, goal, start)
+	}
+	if isPointInsideObstacle(obstacles, goal) {
+		goal = nearestOnLine(obstacles, start, goal)
+	}
+	if straightLine := line(start, goal); isLinePassable(obstacles, straightLine) {
+		return straightLine, nil
+	}
+	return findPath(obstacles, start, goal)
 }
 
-// MustFind returns a path from start to goal, or panics in following cases:
-// - start or goal is outside the map
+// MustFind returns a path from start to goa.
+// If start or goal is outside the map, it will try to find nearest point on the edge of the map.
 // If start or goal is inside an obstacle, it will try to find nearest point on the edge of the obstacle.
 // If there is no path from start to goal, it will try to find nearest point on the edge of the obstacle.
+// It will panic if no path is found.
 func MustFind(obstacles [][]bool, start, goal Point) []Point {
 	panic("TODO")
 }

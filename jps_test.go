@@ -24,7 +24,7 @@ func TestFind_simple(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "simple",
+			name: "1_simple",
 			args: args{
 				obstacles: [][]bool{
 					{false, false, false},
@@ -48,7 +48,7 @@ func TestFind_simple(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "direct",
+			name: "2_direct",
 			args: args{
 				obstacles: [][]bool{
 					{false, false, false},
@@ -70,7 +70,7 @@ func TestFind_simple(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "simple_with_frame",
+			name: "3_simple_with_frame",
 			args: args{
 				obstacles: [][]bool{
 					{true, true, true, true, true, true, true},
@@ -95,7 +95,7 @@ func TestFind_simple(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := Find(tt.args.obstacles, tt.args.start, tt.args.goal)
-			generateImage(t, tt.args.obstacles, tt.args.start, tt.args.goal, got, fmt.Sprintf("./test_output/simple_%s_result.png", tt.name))
+			generateImage(t, tt.args.obstacles, tt.args.start, tt.args.goal, got, fmt.Sprintf("./test_output/Find_simple_%s_result.png", tt.name))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -131,19 +131,167 @@ func TestFind_maps(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name:     "1_direct",
+			name:     "3_direct",
 			filename: "./test_assets/map1.png",
 			start:    Point{140, 195},
 			goal:     Point{250, 300},
+			wantErr:  false,
+		},
+		{
+			name:     "4_start_outside_map",
+			filename: "./test_assets/map1.png",
+			start:    Point{-1, -1},
+			goal:     Point{250, 300},
+			wantErr:  true,
+		},
+		{
+			name:     "5_goal_outside_map",
+			filename: "./test_assets/map1.png",
+			start:    Point{140, 195},
+			goal:     Point{500, 500},
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			obstacles := readPNG(t, tt.filename)
+			got, err := Find(obstacles, tt.start, tt.goal)
+			generateImage(t, obstacles, tt.start, tt.goal, got, fmt.Sprintf("./test_output/Find_maps_%s_result.png", tt.name))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			t.Logf("Find() got = %v", got)
+		})
+	}
+}
+
+func TestTryFind_simple(t *testing.T) {
+	type args struct {
+		obstacles [][]bool
+		start     Point
+		goal      Point
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []Point
+		wantErr bool
+	}{
+		{
+			name: "1_simple",
+			args: args{
+				obstacles: [][]bool{
+					{true, false, false},
+					{false, true, false},
+					{false, true, false},
+					{false, false, false},
+					{false, false, false},
+				},
+				start: Point{0, 0},
+				goal:  Point{4, 2},
+			},
+			want: []Point{
+				{1, 0},
+				{2, 0},
+				{3, 1},
+				{4, 2},
+			},
+			wantErr: false,
+		},
+		{
+			name: "2_direct",
+			args: args{
+				obstacles: [][]bool{
+					{true, false, false},
+					{true, true, false},
+					{false, true, false},
+					{false, true, false},
+					{false, false, false},
+				},
+				start: Point{0, 0},
+				goal:  Point{4, 0},
+			},
+			want: []Point{
+				{2, 0},
+				{3, 0},
+				{4, 0},
+			},
+			wantErr: false,
+		},
+		{
+			name: "3_simple_with_frame",
+			args: args{
+				obstacles: [][]bool{
+					{true, true, true, true, true, true, true},
+					{true, true, true, true, true, true, true},
+					{true, true, true, false, false, true, true},
+					{true, true, false, false, false, true, true},
+					{true, true, false, false, false, true, true},
+					{true, true, true, true, true, true, true},
+					{true, true, true, true, true, true, true},
+				},
+				start: Point{2, 2},
+				goal:  Point{4, 4},
+			},
+			want: []Point{
+				{3, 3},
+				{4, 4},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := TryFind(tt.args.obstacles, tt.args.start, tt.args.goal)
+			generateImage(t, tt.args.obstacles, tt.args.start, tt.args.goal, got, fmt.Sprintf("./test_output/TryFind_simple_%s_result.png", tt.name))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			t.Logf("Find() got = %v", got)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Find() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTryFind_maps(t *testing.T) {
+	tests := []struct {
+		name     string
+		filename string
+		start    Point
+		goal     Point
+		wantErr  bool
+	}{
+		{
+			name:     "1_jps",
+			filename: "./test_assets/map1.png",
+			start:    Point{150, 130},
+			goal:     Point{190, 190},
+			wantErr:  false,
+		},
+		{
+			name:     "2_jps",
+			filename: "./test_assets/map1.png",
+			start:    Point{300, 90},
+			goal:     Point{400, 275},
+			wantErr:  false,
+		},
+		{
+			name:     "3_direct",
+			filename: "./test_assets/map1.png",
+			start:    Point{120, 175},
+			goal:     Point{270, 320},
 			wantErr:  false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			obstacles := readPNG(t, tt.filename)
-			//debugPrintObstacles(obstacles)
-			got, err := Find(obstacles, tt.start, tt.goal)
-			generateImage(t, obstacles, tt.start, tt.goal, got, fmt.Sprintf("./test_output/maps_%s_result.png", tt.name))
+			got, err := TryFind(obstacles, tt.start, tt.goal)
+			generateImage(t, obstacles, tt.start, tt.goal, got, fmt.Sprintf("./test_output/TryFind_maps_%s_result.png", tt.name))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -241,11 +389,15 @@ func generateImage(tb TB, obstacles [][]bool, start, goal Point, path []Point, f
 	img.Set(width-1, 0, color.RGBA{255, 255, 0, 255})
 	img.Set(width-1, height-1, color.RGBA{255, 255, 0, 255})
 
-	if start.X >= 0 {
+	if isPointPassable(obstacles, start) {
 		img.Set(start.X, start.Y, color.RGBA{0, 255, 0, 255}) // green for start
+	} else if !isPointOutsideMap(obstacles, start) && isPointInsideObstacle(obstacles, start) {
+		img.Set(start.X, start.Y, color.RGBA{0, 128, 0, 255}) // dark green for obstacle
 	}
-	if goal.X >= 0 {
+	if isPointPassable(obstacles, goal) {
 		img.Set(goal.X, goal.Y, color.RGBA{255, 0, 0, 255}) // red for goal
+	} else if !isPointOutsideMap(obstacles, goal) && isPointInsideObstacle(obstacles, goal) {
+		img.Set(goal.X, goal.Y, color.RGBA{128, 0, 0, 255}) // dark red for obstacle
 	}
 
 	file, err := os.Create(filePath)
