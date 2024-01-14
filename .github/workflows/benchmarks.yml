@@ -40,4 +40,4 @@ jobs:
           alert-threshold: '200%'
           comment-on-alert: true
           alert-comment-cc-users: '@mkyc'
-          benchmark-data-dir-path: /dev/bench/${{ matrix.go-version }}
+          benchmark-data-dir-path: dev/bench/${{ matrix.go-version }}

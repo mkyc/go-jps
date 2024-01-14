@@ -19,12 +19,12 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
-      - name: go envs
-        run: go env
+      - name: Set GOCACHE environment variable
+        run: echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
       - name: Setup Golang caches
         uses: actions/cache@v3
         with:
-          path: $GOCACHE/fuzz
+          path: ${{ env.GOCACHE }}/fuzz
           key: fuzz-${{ matrix.go-version }}-${{ hashFiles('jps_test.go') }}
           restore-keys: |
             fuzz-${{ matrix.go-version }}-
