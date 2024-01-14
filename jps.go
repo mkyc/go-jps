@@ -10,16 +10,16 @@ import (
 // - start or goal is inside an obstacle
 // - there is no path from start to goal
 func Find(obstacles obstacles, start, goal Point) ([]Point, error) {
-	if obstacles.pointOutsideMap(start) {
+	if obstacles.isPointOutsideMap(start) {
 		return nil, errors.New("start is outside the map")
 	}
-	if obstacles.pointOutsideMap(goal) {
+	if obstacles.isPointOutsideMap(goal) {
 		return nil, errors.New("goal is outside the map")
 	}
-	if obstacles.pointInsideObstacle(start) {
+	if obstacles.isPointInsideObstacle(start) {
 		return nil, errors.New("start is inside an obstacle")
 	}
-	if obstacles.pointInsideObstacle(goal) {
+	if obstacles.isPointInsideObstacle(goal) {
 		return nil, errors.New("goal is inside an obstacle")
 	}
 	straightLine := start.lineTo(goal)
@@ -45,7 +45,7 @@ func MustFind(obstacles [][]bool, start, goal Point) []Point {
 	panic("TODO")
 }
 
-func findPath(obstacles [][]bool, start, goal Point) ([]Point, error) {
+func findPath(obstacles obstacles, start, goal Point) ([]Point, error) {
 	m := make(map[Point]Point)
 	q := make(priorityQueue, 0)
 	heap.Init(&q)
@@ -64,7 +64,7 @@ func findPath(obstacles [][]bool, start, goal Point) ([]Point, error) {
 		if current.point == goal {
 			return reconstructPath(m, start, goal), nil
 		}
-		candidates := prepareCandidates(obstacles, current.point, current.predecessor, goal)
+		candidates := obstacles.prepareCandidates(current.point, current.predecessor, goal)
 		for _, candidate := range candidates {
 			if _, ok := m[candidate.p]; !ok {
 				heap.Push(&q, &item{
