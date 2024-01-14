@@ -9,24 +9,21 @@ import (
 // - start or goal is outside the map
 // - start or goal is inside an obstacle
 // - there is no path from start to goal
-func Find(obstacles [][]bool, start, goal Point) ([]Point, error) {
-	startCheck := checkPoints(obstacles, start)
-	goalCheck := checkPoints(obstacles, goal)
-	if startCheck == pointCheckOutsideMap {
+func Find(obstacles obstacles, start, goal Point) ([]Point, error) {
+	if obstacles.pointOutsideMap(start) {
 		return nil, errors.New("start is outside the map")
 	}
-	if goalCheck == pointCheckOutsideMap {
+	if obstacles.pointOutsideMap(goal) {
 		return nil, errors.New("goal is outside the map")
 	}
-	if startCheck == pointCheckInsideObst {
+	if obstacles.pointInsideObstacle(start) {
 		return nil, errors.New("start is inside an obstacle")
 	}
-	if goalCheck == pointCheckInsideObst {
+	if obstacles.pointInsideObstacle(goal) {
 		return nil, errors.New("goal is inside an obstacle")
 	}
 	straightLine := start.lineTo(goal)
-	lineCheck := checkPoints(obstacles, straightLine...)
-	if lineCheck == pointCheckPassable {
+	if obstacles.isLinePassable(straightLine) {
 		return straightLine, nil
 	}
 	return findPath(obstacles, start, goal)
