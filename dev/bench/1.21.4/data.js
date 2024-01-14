@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705254111376,
+  "lastUpdate": 1705270474548,
   "repoUrl": "https://github.com/mkyc/go-jps",
   "entries": {
     "Benchmark": [
@@ -180,6 +180,36 @@ window.BENCHMARK_DATA = {
             "value": 1574951,
             "unit": "ns/op",
             "extra": "753 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "mateusz.kyc@gmail.com",
+            "name": "Mateusz Kyc",
+            "username": "mkyc"
+          },
+          "committer": {
+            "email": "mateusz.kyc@gmail.com",
+            "name": "Mateusz Kyc",
+            "username": "mkyc"
+          },
+          "distinct": true,
+          "id": "8184ff89f80ec1e7026179155cb6942fe4b3f4c7",
+          "message": "fix path",
+          "timestamp": "2024-01-14T23:14:03+01:00",
+          "tree_id": "4ee5960c07edb625590f1dd8f8e3238fa0116592",
+          "url": "https://github.com/mkyc/go-jps/commit/8184ff89f80ec1e7026179155cb6942fe4b3f4c7"
+        },
+        "date": 1705270474194,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFind",
+            "value": 1574395,
+            "unit": "ns/op",
+            "extra": "728 times\n4 procs"
           }
         ]
       }
