@@ -9,21 +9,21 @@ import (
 // - start or goal is outside the map
 // - start or goal is inside an obstacle
 // - there is no path from start to goal
-func Find(obstacles obstacles, start, goal Point) ([]Point, error) {
-	if obstacles.isPointOutsideMap(start) {
+func Find(obstacles [][]bool, start, goal Point) ([]Point, error) {
+	if isPointOutsideMap(obstacles, start) {
 		return nil, errors.New("start is outside the map")
 	}
-	if obstacles.isPointOutsideMap(goal) {
+	if isPointOutsideMap(obstacles, goal) {
 		return nil, errors.New("goal is outside the map")
 	}
-	if obstacles.isPointInsideObstacle(start) {
+	if isPointInsideObstacle(obstacles, start) {
 		return nil, errors.New("start is inside an obstacle")
 	}
-	if obstacles.isPointInsideObstacle(goal) {
+	if isPointInsideObstacle(obstacles, goal) {
 		return nil, errors.New("goal is inside an obstacle")
 	}
-	straightLine := start.lineTo(goal)
-	if obstacles.isLinePassable(straightLine) {
+	straightLine := line(start, goal)
+	if isLinePassable(obstacles, straightLine) {
 		return straightLine, nil
 	}
 	return findPath(obstacles, start, goal)
@@ -45,7 +45,7 @@ func MustFind(obstacles [][]bool, start, goal Point) []Point {
 	panic("TODO")
 }
 
-func findPath(obstacles obstacles, start, goal Point) ([]Point, error) {
+func findPath(obstacles [][]bool, start, goal Point) ([]Point, error) {
 	m := make(map[Point]Point)
 	q := make(priorityQueue, 0)
 	heap.Init(&q)
@@ -53,7 +53,7 @@ func findPath(obstacles obstacles, start, goal Point) ([]Point, error) {
 		point:             start,
 		predecessor:       Point{},
 		distanceFromStart: 0,
-		distanceToGoal:    start.distanceTo(goal),
+		distanceToGoal:    distance(start, goal),
 	})
 	for q.Len() > 0 {
 		current := heap.Pop(&q).(*item)
@@ -64,14 +64,14 @@ func findPath(obstacles obstacles, start, goal Point) ([]Point, error) {
 		if current.point == goal {
 			return reconstructPath(m, start, goal), nil
 		}
-		candidates := obstacles.prepareCandidates(current.point, current.predecessor, goal)
+		candidates := prepareCandidates(obstacles, current.point, current.predecessor, goal)
 		for _, candidate := range candidates {
 			if _, ok := m[candidate.p]; !ok {
 				heap.Push(&q, &item{
 					point:             candidate.p,
 					predecessor:       current.point,
 					distanceFromStart: current.distanceFromStart + candidate.price,
-					distanceToGoal:    candidate.p.distanceTo(goal),
+					distanceToGoal:    distance(candidate.p, goal),
 				})
 			}
 		}
