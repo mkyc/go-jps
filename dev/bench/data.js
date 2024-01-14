@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705242143818,
+  "lastUpdate": 1705244755166,
   "repoUrl": "https://github.com/mkyc/go-jps",
   "entries": {
     "Benchmark": [
@@ -90,6 +90,36 @@ window.BENCHMARK_DATA = {
             "value": 1412216,
             "unit": "ns/op",
             "extra": "836 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "mateusz.kyc@gmail.com",
+            "name": "Mateusz Kyc",
+            "username": "mkyc"
+          },
+          "committer": {
+            "email": "mateusz.kyc@gmail.com",
+            "name": "Mateusz Kyc",
+            "username": "mkyc"
+          },
+          "distinct": true,
+          "id": "4de3786ea9fe290a02015178f695adbe1c3a2bd7",
+          "message": "move preparers to obstacles type as well",
+          "timestamp": "2024-01-14T16:05:27+01:00",
+          "tree_id": "74f9d2c5121fde16e3930949567c0353e8358b65",
+          "url": "https://github.com/mkyc/go-jps/commit/4de3786ea9fe290a02015178f695adbe1c3a2bd7"
+        },
+        "date": 1705244754798,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFind",
+            "value": 1574870,
+            "unit": "ns/op",
+            "extra": "759 times\n4 procs"
           }
         ]
       }
