@@ -1,0 +1,29 @@
+name: Test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  fuzz:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ '1.21.4' ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Run tests
+        run: go test -json > TestResults-${{ matrix.go-version }}.json
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: Go-tests-${{ matrix.go-version }}
+          path: TestResults-${{ matrix.go-version }}.json
