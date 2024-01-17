@@ -301,6 +301,178 @@ func TestTryFind_maps(t *testing.T) {
 	}
 }
 
+func TestMustFind_simple(t *testing.T) {
+	type args struct {
+		obstacles [][]bool
+		start     Point
+		goal      Point
+	}
+	tests := []struct {
+		name string
+		args args
+		want []Point
+	}{
+		{
+			name: "1_simple",
+			args: args{
+				obstacles: [][]bool{
+					{false, false, false},
+					{false, true, false},
+					{false, true, false},
+					{false, true, false},
+					{false, false, false},
+				},
+				start: Point{-1, -1},
+				goal:  Point{4, 2},
+			},
+			want: []Point{
+				{0, 0},
+				{1, 0},
+				{2, 0},
+				{3, 0},
+				{4, 0},
+				{4, 1},
+				{4, 2},
+			},
+		},
+		{
+			name: "2_direct",
+			args: args{
+				obstacles: [][]bool{
+					{true, false, false},
+					{true, true, false},
+					{false, true, false},
+					{false, true, false},
+					{false, false, false},
+				},
+				start: Point{-1, 0},
+				goal:  Point{4, 0},
+			},
+			want: []Point{
+				{2, 0},
+				{3, 0},
+				{4, 0},
+			},
+		},
+		{
+			name: "3_simple_with_frame",
+			args: args{
+				obstacles: [][]bool{
+					{true, true, true, true, true, true, true},
+					{true, true, true, true, true, true, true},
+					{true, true, false, false, false, true, true},
+					{true, true, false, false, false, true, true},
+					{true, true, false, false, false, true, true},
+					{true, true, true, true, true, true, true},
+					{true, true, true, true, true, true, true},
+				},
+				start: Point{-1, -1},
+				goal:  Point{4, 4},
+			},
+			want: []Point{
+				{2, 2},
+				{3, 3},
+				{4, 4},
+			},
+		},
+		{
+			name: "4_no_path_to_goal",
+			args: args{
+				obstacles: [][]bool{
+					{false, false, true, false, false, true, false},
+					{false, false, true, false, false, true, false},
+					{false, false, true, false, false, true, false},
+					{false, false, true, false, false, true, false},
+					{false, false, true, false, false, true, false},
+					{false, false, true, false, false, true, false},
+					{false, false, false, false, false, true, false},
+				},
+				start: Point{3, 0},
+				goal:  Point{3, 6},
+			},
+			want: []Point{
+				{3, 0},
+			},
+		},
+		{
+			name: "5_no_path_from_start",
+			args: args{
+				obstacles: [][]bool{
+					{false, true, false, false, false, false, false},
+					{false, true, false, false, false, true, false},
+					{false, true, false, false, false, true, false},
+					{false, true, false, false, false, true, false},
+					{false, true, false, false, false, true, false},
+					{false, true, false, false, false, true, false},
+					{false, true, false, false, false, true, false},
+				},
+				start: Point{3, 0},
+				goal:  Point{3, 6},
+			},
+			want: []Point{
+				{3, 0},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			got := MustFind(tt.args.obstacles, tt.args.start, tt.args.goal)
+			generateImage(t, tt.args.obstacles, tt.args.start, tt.args.goal, got, fmt.Sprintf("./test_output/MustFind_simple_%s_result.png", tt.name))
+			t.Logf("Find() got = %v", got)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Find() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMustFind_maps(t *testing.T) {
+	tests := []struct {
+		name     string
+		filename string
+		start    Point
+		goal     Point
+		wantPath bool
+	}{
+		{
+			name:     "1_jps",
+			filename: "./test_assets/map1.png",
+			start:    Point{150, -10},
+			goal:     Point{190, 190},
+			wantPath: true,
+		},
+		{
+			name:     "2_jps",
+			filename: "./test_assets/map1.png",
+			start:    Point{300, 90},
+			goal:     Point{500, 400},
+			wantPath: true,
+		},
+		{
+			name:     "3_jps",
+			filename: "./test_assets/map1.png",
+			start:    Point{120, 20},
+			goal:     Point{280, 330},
+			wantPath: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			obstacles := readPNG(t, tt.filename)
+			got := MustFind(obstacles, tt.start, tt.goal)
+			generateImage(t, obstacles, tt.start, tt.goal, got, fmt.Sprintf("./test_output/MustFind_maps_%s_result.png", tt.name))
+			t.Logf("Find() got = %v", got)
+			if tt.wantPath && len(got) == 1 {
+				t.Errorf("Find() got = %v, want non empty path", got)
+			}
+			if !tt.wantPath && len(got) > 1 {
+				t.Errorf("Find() got = %v, want empty path", got)
+			}
+		})
+	}
+}
+
 func FuzzFind(f *testing.F) {
 	obstacles := readPNG(f, "./test_assets/passable_map1.png")
 	f.Fuzz(func(t *testing.T, startX, startY, goalX, goalY int) {
@@ -328,7 +500,12 @@ func readPNG(tb TB, filename string) [][]bool {
 	if err != nil {
 		tb.Fatal(err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			tb.Fatal(err)
+		}
+	}(file)
 
 	img, err := png.Decode(file)
 	if err != nil {
@@ -404,7 +581,12 @@ func generateImage(tb TB, obstacles [][]bool, start, goal Point, path []Point, f
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			tb.Fatal(err)
+		}
+	}(file)
 
 	err = png.Encode(file, img)
 	if err != nil {
